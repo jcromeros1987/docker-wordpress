@@ -1,23 +1,41 @@
-version: '3'
+version: '3.8'
 services:
+  mysql:
+    container_name: mysql1
+    image: mysql:8.0
+    restart: unless-stopped
+    environment:
+      - MYSQL_ROOT_PASSWORD=password
+      - MYSQL_DATABASE=wordpress
+      - MYSQL_USER=wordpress
+      - MYSQL_PASSWORD=password
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
   wordpress:
-#    container_name: wordpress
-#    build:
-#      context: ./
-#      dockerfile: Dockerfile
-    image: wordpress:latest
+    container_name: wordpress1
+    build:
+      context: ./
+      dockerfile: Dockerfile
+    # image: wordpress:latest
     ports:
       - "8080:80"
     environment:
       - ENV=development
       - MYSQL_HOST=mysql
-      - MYSQL_USERNAME=root
+      - MYSQL_USERNAME=wordpress
       - MYSQL_PASSWORD=password
       - MYSQL_DATABASE=wordpress
       - MYSQL_PORT=3306
       - DEBUG=false
       - DOMAIN_CURRENT_SITE=wordpress.lvh.me
       - CDN_DOMAIN=wordpress.lvh.me
+    depends_on:
+      - mysql
+    volumes:
+      - wordpress_data:/var/www/html
 
 volumes:
-  wordpress:
+  wordpress_data:
+  mysql_data:

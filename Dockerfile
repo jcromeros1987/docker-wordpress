@@ -28,18 +28,18 @@ RUN apt-get -o Acquire::Check-Valid-Until=false update -q && apt-get -y install 
     libcurl4-openssl-dev \
     libapr1-dev \
     wget \
-    supervisor \
-    && cd ~ \
-    && wget https://cache.ruby-lang.org/pub/ruby/2.4/ruby-2.4.5.tar.gz \
-    && tar -xvf ruby-2.4.5.tar.gz \
-    && cd ruby-2.4.5/ \
-    && ./configure \
-    && make \
-    && make test \
-    && make install \
-    && cd ~ \
-    && rm -rf ruby-2.4.5 \
-    && apt-get -y upgrade
+    supervisor
+    #&& cd ~ \
+    #&& wget https://cache.ruby-lang.org/pub/ruby/2.4/ruby-2.4.5.tar.gz \
+    #&& tar -xvf ruby-2.4.5.tar.gz \
+    #&& cd ruby-2.4.5/ \
+    #&& ./configure \
+    #&& make \
+    #&& make test \
+    #&& make install \
+    #&& cd ~ \
+    #&& rm -rf ruby-2.4.5 \
+    #&& apt-get -y upgrade
 
 # Configure sury
 RUN apt-get -y install lsb-release apt-transport-https ca-certificates  \
@@ -120,6 +120,10 @@ ADD deployment /deployment
 # Startup
 ADD deployment/start.sh /usr/local/bin/start.sh
 ADD deployment/build-css.sh /usr/local/bin/build-css.sh
+
+
+RUN chmod +x /usr/local/bin/start.sh
+
 CMD ["/usr/local/bin/start.sh"]
 
 # Workdir
@@ -127,13 +131,15 @@ RUN mkdir -p /var/www/html
 WORKDIR /var/www/html
 
 # Application
-#ADD wordpress /var/www/html/
+ADD wordpress /var/www/html/
+
+RUN chmod +x /usr/local/bin/build-css.sh
 
 # Compile css
 RUN /usr/local/bin/build-css.sh
 
 # Copy over git information
-#RUN mkdir -p /var/www/html/.git
-#ADD .git/HEAD /var/www/html/.git/HEAD
-#ADD .git/ORIG_HEAD /var/www/html/.git/ORIG_HEAD
-#RUN ["/bin/sh", "-c", "cat /var/www/html/.git/HEAD | cut -d'/' -f 3 > /var/www/html/.git/BRANCH"]
+RUN mkdir -p /var/www/html/.git
+ADD .git/HEAD /var/www/html/.git/HEAD
+ADD .git/ORIG_HEAD /var/www/html/.git/ORIG_HEAD
+RUN ["/bin/sh", "-c", "cat /var/www/html/.git/HEAD | cut -d'/' -f 3 > /var/www/html/.git/BRANCH"]
